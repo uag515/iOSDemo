@@ -27,9 +27,12 @@ class Meal : NSObject, NSCoding{
         //Because photo is an optional property of Meal, just use conditional cast
         let photo = aDecoder.decodeObject(forKey: property.photo) as? UIImage
         
-        let rating = aDecoder.decodeObject(forKey: property.rating)
+        guard let rating = aDecoder.decodeObject(forKey: property.rating) as? Int else{
+              os_log( "Unable to decode the rating for the Meal object", log: OSLog.default, type : .debug)
+            return nil
+        }
         
-        self.init(name: name, photo: photo, rating: rating as! Int)
+        self.init(name: name, photo: photo, rating: rating)
         
     }
     
