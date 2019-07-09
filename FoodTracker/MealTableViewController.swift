@@ -7,15 +7,37 @@
 //
 
 import UIKit
+import os.log
 
 class MealTableViewController: UITableViewController {
+    //MARK: action
+    @IBAction func unwindToMealList(sender: UIStoryboardSegue){
+
+        if let sourceViewController = sender.source as?
+            MealViewController,let meal = sourceViewController.meal{
+            
+            if let selectedIndexPath = tableView.indexPathForSelectedRow{
+                //edit existing rows
+                meals[selectedIndexPath.row] = meal
+                tableView.reloadRows(at: [selectedIndexPath], with: .none)
+            }
+            else{
+            // add a new meal
+            let newIndexPath = IndexPath(row: meals.count, section: 0)
+            meals.append(meal)
+            tableView.insertRows(at: [newIndexPath], with: .automatic)
+            }
+        }
+    }
+    
     //MARK: properties
     var meals = [Meal]()
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // use the edit button item provied by table view controller
+        navigationItem.leftBarButtonItem = editButtonItem
         // load the sample data
         loadSampleMeals()
     }
@@ -58,17 +80,18 @@ class MealTableViewController: UITableViewController {
     }
     */
 
-    /*
+    
     // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             // Delete the row from the data source
+            meals.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
         } else if editingStyle == .insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }    
     }
-    */
+    
 
     /*
     // Override to support rearranging the table view.
@@ -77,23 +100,42 @@ class MealTableViewController: UITableViewController {
     }
     */
 
-    /*
+    
     // Override to support conditional rearranging of the table view.
     override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the item to be re-orderable.
         return true
     }
-    */
+    
 
-    /*
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        super.prepare(for: segue, sender: sender)
         // Get the new view controller using segue.destination.
         // Pass the selected object to the new view controller.
+        switch (segue.identifier ?? "") {
+        case "AddItem":
+            os_log("Add a new meal", log: OSLog.default, type:.debug)
+        case "ShowDetial":
+            guard let mealDetailViewController = segue.destination as? MealViewController else {
+                fatalError("Unexpected destination \(segue.destination)")
+            }
+            guard let selectMealCell = sender as? MealTableViewCell else {
+                fatalError("Unexpected destination \(sender ?? "kk")")
+            }
+            guard let indexPath = tableView.indexPath(for: selectMealCell) else {
+                fatalError("The selected cell is not displayed by the table")
+            }
+            
+            let selectedMeal = meals[indexPath.row]
+            mealDetailViewController.meal = selectedMeal
+        default:
+            fatalError("Unexpected segue inditifier; \(segue.identifier ?? "kk")")
+        }
     }
-    */
+
 
     //MARK: private method
     private func loadSampleMeals(){
